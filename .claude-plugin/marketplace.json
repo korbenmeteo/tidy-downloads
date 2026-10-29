@@ -1,0 +1,12 @@
+{
+  "name": "tidy-downloads",
+  "owner": { "name": "Ruben Hallali" },
+  "description": "Sort a Downloads folder from rules you own.",
+  "plugins": [
+    {
+      "name": "tidy-downloads",
+      "source": "./",
+      "description": "Sort a messy Downloads folder into your own folder tree from rules you own: plan first, move after, undo anytime."
+    }
+  ]
+}

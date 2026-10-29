@@ -1,0 +1,25 @@
+[build-system]
+requires = ["setuptools>=61"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "tidy-downloads"
+version = "0.1.0"
+description = "Sort a downloads folder into a target tree from rules you own: plan first, move after, undo anytime."
+readme = "README.md"
+license = { text = "MIT" }
+authors = [{ name = "Ruben Hallali" }]
+requires-python = ">=3.11"
+dependencies = []
+
+[project.optional-dependencies]
+pdf = ["pypdf"]
+
+[project.scripts]
+tidy-downloads = "tidy_downloads.cli:main"
+
+[project.urls]
+Source = "https://github.com/korbenmeteo/tidy-downloads"
+
+[tool.setuptools.package-data]
+tidy_downloads = ["rules.example.toml"]

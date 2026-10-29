@@ -1,0 +1,8 @@
+{
+  "name": "tidy-downloads",
+  "version": "0.1.0",
+  "description": "Sort a messy Downloads folder into your own folder tree from rules you own: plan first, move after, undo anytime.",
+  "author": { "name": "Ruben Hallali", "url": "https://x.com/RubenHallali" },
+  "license": "MIT",
+  "keywords": ["downloads", "files", "organise", "cli", "macos", "productivity"]
+}

@@ -1,0 +1,12 @@
+# Personal data: never commit
+rules.toml
+plan*.csv
+journal*.tsv
+text_cache.json
+# Python
+__pycache__/
+*.egg-info/
+build/
+dist/
+.venv/
+.DS_Store

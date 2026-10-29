@@ -1,0 +1,179 @@
+# tidy-downloads rules: an example for a small company (Acme) and the person who runs it.
+# Copy it to the path `tidy-downloads --help` shows for --rules, then make it yours.
+#
+# How a file is decided, first match wins:
+#   1. [[rules]] with stage = "personal"
+#   2. photos, screenshots, videos, audio, generic images (built in, destinations in [media])
+#   3. the entity: an id or name in the file, otherwise the entity active on the file's date
+#   4. [[rules]] with stage = "pro"
+#   5. [[themes]] on the name (entity names removed first), then [[text_themes]] on the text
+#   6. [[routes]] to a client or partner folder, unless the theme is admin
+#   7. otherwise {archive}/{year}/Unidentified
+#
+# Matching: names and text are lower-cased with accents removed. Keywords of 4 letters or fewer
+# need a word boundary ("nda" does not match "calendar"). Regexes (name, path, text, patterns) are Python regexes.
+# Destinations can use {entity}, {year}, {archive} and {theme:<id>} (the entity's folder for that theme).
+
+[settings]
+archive = "Archive"                    # duplicates, noise and unidentified files go under {archive}/{year}/
+descend_dirs = ["PDF", "Images"]       # subfolders made by a browser or an older tidy-up: sort their files one by one
+ignore_dirs = ["Old attempts"]         # leave these alone
+text_exts = ["pdf", "docx", "doc"]     # spreadsheet text is too noisy to sort by
+
+[media]
+photo = "Personal/Photos/{year}"
+screenshot = "{archive}/{year}/Screenshots"
+
+[folders]                              # whole folders moved as they are, by exact name
+"Brand assets" = "Acme/Brand"
+"Board pack Q1" = "Acme/Admin/Board"
+
+# ------------------------------------------------------------------ entities
+[[entities]]
+folder = "Acme"
+aliases = ["acme"]
+ids = ["123456789", "123 456 789"]    # company number, VAT number: found in the text, they decide
+start = 2024-05-15
+
+[[entities]]
+folder = "Old Studio"                  # the business before Acme
+aliases = ["old studio", "oldstudio"]
+ids = ["987654321"]
+end = 2024-05-15
+[entities.themes]                      # this entity names some folders differently
+decks = "Sales material"
+
+# ------------------------------------------------------------------ explicit rules
+[[rules]]
+stage = "personal"
+keywords = ["prescription", "lab results", "x-ray", "gp letter"]
+unless = ["acme"]
+dest = "Personal/Health"
+
+[[rules]]
+stage = "personal"
+keywords = ["tenancy", "lease", "mortgage", "home insurance", "council tax"]
+dest = "Personal/Home"
+
+[[rules]]
+stage = "personal"
+text_keywords = ["mortgage offer", "completion statement"]
+unless_text = ["acme"]
+dest = "Personal/Home"
+
+[[rules]]
+stage = "personal"
+keywords = ["passport", "driving licence", "id card"]
+dest = "Personal/ID & admin"
+
+[[rules]]
+stage = "pro"
+name = "tender|rfp|invitation to tender"
+dest = "{entity}/Clients/Tenders"
+
+[[rules]]
+stage = "pro"
+name = "^scan_|^camscanner"
+dest = "{archive}/{year}/Scans to identify"
+
+[[rules]]
+stage = "pro"
+text = "^(date|timestamp)[,;].*(temperature|sales|visits)"
+dest = "{entity}/{theme:data}"
+
+# ------------------------------------------------------------------ themes, in order
+[[themes]]
+id = "invoices_issued"
+dest = "Admin/Invoices/Issued"
+admin = true
+patterns = ['(^|/)inv-\d{4}-\d{3}']
+needs_entity_in_name = true            # a supplier can use the same numbering: issued only if our name is on it
+otherwise = "invoices_received"        # entity_name_exempt = '<regex>' would accept names that are ours without it
+
+[[themes]]
+id = "payroll"
+dest = "HR & payroll"
+admin = true
+keywords = ["payslip", "payroll", "p60", "employment contract", "cv", "offer letter"]
+
+[[themes]]
+id = "bank"
+dest = "Admin/Bank"
+admin = true
+keywords = ["bank statement", "statement", "iban", "transfer", "direct debit"]
+
+[[themes]]
+id = "contracts"
+dest = "Admin/Legal"
+keywords = ["nda", "agreement", "contract", "terms", "articles of association", "minutes"]
+
+[[themes]]
+id = "invoices_received"
+dest = "Admin/Invoices/Received"
+admin = true
+keywords = ["invoice", "receipt", "order confirmation", "quote"]
+
+[[themes]]
+id = "travel"
+dest = "Admin/Travel & expenses"
+admin = true
+keywords = ["boarding pass", "e-ticket", "booking confirmation", "hotel"]
+
+[[themes]]
+id = "decks"
+dest = "Sales/Decks"
+exts = ["pptx", "ppt", "key"]
+keywords = ["deck", "pitch", "presentation"]
+
+[[themes]]
+id = "data"
+dest = "Data"
+require_exts = ["csv", "json", "xlsx", "xls", "zip"]
+keywords = ["export", "data", "dataset"]
+
+[[themes]]
+id = "reading"
+dest = "Reading"
+keywords = ["whitepaper", "white paper", "report", "study", "paper"]
+
+[[themes]]
+id = "dev"
+dest = "Dev"
+exts = ["py", "ipynb", "js", "ts", "html", "sql", "sh"]
+
+[[themes]]
+id = "notes"
+dest = "Notes"
+exts = ["md", "txt"]
+
+# ------------------------------------------------------------------ themes read from the text (PDF and Word only)
+[[text_themes]]
+theme = "payroll"
+keywords = ["payslip", "pay period", "employment contract"]
+
+[[text_themes]]
+theme = "invoices_received"
+keywords = ["invoice", "amount due", "total due", "receipt"]
+
+[[text_themes]]
+theme = "contracts"
+keywords = ["agreement", "contract", "hereinafter"]
+
+# ------------------------------------------------------------------ clients and partners
+[[routes]]
+entity = "Acme"
+keywords = ["globex", "globex corp"]
+dest = "Clients/Globex"
+label = "client"
+
+[[routes]]
+entity = "Acme"
+keywords = ["initech"]
+dest = "Partners/Initech"
+label = "partner"
+
+[[routes]]
+entity = "Old Studio"
+keywords = ["umbrella"]
+dest = "Clients/Umbrella"
+label = "client"
